@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Transfer - Secure Data Movement</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "outline-variant": "#c5c5d7",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "on-background": "#191c1e",
+                        "on-primary-fixed": "#000d60",
+                        "on-secondary-container": "#54647a",
+                        "on-surface": "#191c1e",
+                        "surface-container-high": "#e6e8ea",
+                        "inverse-on-surface": "#eff1f3",
+                        "primary": "#2036bd",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#1d34ba",
+                        "tertiary": "#7e3100",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-tertiary-fixed-variant": "#7a2f00",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#0b1c30",
+                        "inverse-surface": "#2d3133",
+                        "outline": "#757686",
+                        "tertiary-container": "#a44200",
+                        "surface-container": "#eceef0",
+                        "surface-tint": "#3b4fd2",
+                        "on-primary-container": "#d7daff",
+                        "primary-fixed": "#dfe0ff",
+                        "surface-variant": "#e0e3e5",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#454654",
+                        "secondary-container": "#d0e1fb",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary-container": "#ffd3bf",
+                        "background": "#f7f9fb",
+                        "inverse-primary": "#bbc3ff",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d8dadc",
+                        "primary-fixed-dim": "#bbc3ff",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#3e52d5",
+                        "on-primary": "#ffffff",
+                        "secondary": "#505f76",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface": "#f7f9fb"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "container-max-width": "1200px",
+                        "section-gap": "64px",
+                        "gutter": "24px",
+                        "margin-page": "48px",
+                        "unit": "8px"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Manrope', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .drop-zone-dashed {
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%232036bd' stroke-width='2' stroke-dasharray='8%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+        }
+        .animate-progress { transition: width 0.3s ease-in-out; }
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+
+    <!-- App Bar -->
+    <header class="bg-background w-full sticky top-0 z-50 border-b border-outline-variant">
+        <div class="flex justify-between items-center h-16 px-margin-page max-w-container-max-width mx-auto">
+            <div class="flex items-center gap-unit cursor-pointer" onclick="window.location.reload()">
+                <span class="material-symbols-outlined text-primary text-3xl">cloud_upload</span>
+                <h1 class="text-xl font-bold text-primary">Transfer</h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <nav class="hidden md:flex gap-6 items-center">
+                    <a class="text-xs font-bold text-primary uppercase tracking-wider" href="#" onclick="window.location.reload()">Transfer</a>
+                    <a class="text-xs font-bold text-on-surface-variant hover:text-primary transition-colors uppercase tracking-wider" href="#">History</a>
+                    <a class="text-xs font-bold text-on-surface-variant hover:text-primary transition-colors uppercase tracking-wider" href="#">Settings</a>
+                </nav>
+                <button class="material-symbols-outlined text-primary hover:text-primary-container">help</button>
+            </div>
+        </div>
+    </header>
+
+    <main id="app" class="flex-grow flex flex-col items-center py-section-gap px-margin-page max-w-container-max-width mx-auto w-full">
+        
+        <!-- STEP 1: UPLOAD SELECTION -->
+        <div id="step-selection" class="w-full max-w-3xl flex flex-col items-center">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold text-on-surface mb-2">Move your data securely</h2>
+                <p class="text-on-surface-variant">Fast, encrypted file transfers for modern professionals.</p>
+            </div>
+
+            <div class="w-full bg-surface-container-lowest rounded-xl border border-outline-variant p-8 flex flex-col gap-8 shadow-sm">
+                <!-- Drop Zone -->
+                <div id="drop-zone" class="group relative w-full h-80 drop-zone-dashed rounded-lg bg-primary/5 flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors duration-200">
+                    <input type="file" id="file-input" multiple class="hidden" />
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-outline-variant group-hover:scale-110 transition-transform duration-200">
+                            <span class="material-symbols-outlined text-primary text-3xl">add</span>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xl font-bold text-primary">Drop files here</p>
+                            <p class="text-sm text-on-surface-variant mt-1">or Click to upload (Max 500MB)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Files List -->
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Selected Files</span>
+                        <span id="usage-text" class="text-xs font-bold text-on-surface-variant">0 of 500MB used</span>
+                    </div>
+                    
+                    <div id="file-list-container" class="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                        <!-- Empty State -->
+                        <div id="empty-list-placeholder" class="flex items-center gap-4 p-4 border border-outline-variant bg-surface rounded-lg opacity-40 grayscale">
+                            <span class="material-symbols-outlined text-secondary">description</span>
+                            <div class="flex-grow">
+                                <p class="text-sm">No files selected yet</p>
+                                <div class="w-full bg-outline-variant h-[2px] mt-2 rounded-full overflow-hidden">
+                                    <div class="w-0 bg-primary h-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Section -->
+                <div class="flex flex-col md:flex-row gap-4 items-center justify-between pt-4 border-t border-outline-variant">
+                    <div class="flex gap-2">
+                        <button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-secondary font-bold text-sm hover:bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-sm">link</span>
+                            Get Link
+                        </button>
+                        <button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-secondary font-bold text-sm hover:bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-sm">mail</span>
+                            Email Transfer
+                        </button>
+                    </div>
+                    <button id="submit-btn" disabled class="w-full md:w-auto px-10 py-3 bg-secondary text-on-secondary opacity-50 cursor-not-allowed font-bold rounded-lg transition-all shadow-md">
+                        Upload Files
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 w-full">
+                <div class="p-6 bg-surface-container-low rounded-xl border border-outline-variant">
+                    <span class="material-symbols-outlined text-primary mb-4 block">security</span>
+                    <h3 class="font-bold text-on-surface mb-2">End-to-End Encryption</h3>
+                    <p class="text-sm text-on-surface-variant leading-relaxed">Your files are encrypted before they even leave your computer.</p>
+                </div>
+                <div class="p-6 bg-surface-container-low rounded-xl border border-outline-variant">
+                    <span class="material-symbols-outlined text-primary mb-4 block">bolt</span>
+                    <h3 class="font-bold text-on-surface mb-2">Lightning Fast</h3>
+                    <p class="text-sm text-on-surface-variant leading-relaxed">Global server network ensures the fastest possible transfer speeds.</p>
+                </div>
+                <div class="p-6 bg-surface-container-low rounded-xl border border-outline-variant">
+                    <span class="material-symbols-outlined text-primary mb-4 block">timer</span>
+                    <h3 class="font-bold text-on-surface mb-2">Auto-Expiry</h3>
+                    <p class="text-sm text-on-surface-variant leading-relaxed">Files are automatically deleted after they have been downloaded.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: PROCESSING (folderprocess.html) -->
+        <div id="step-processing" class="w-full max-w-2xl hidden">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-lg">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-on-surface">Uploading Files...</h2>
+                        <p class="text-on-surface-variant">Securing and moving your data to our encrypted vault.</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-primary font-bold">
+                        <span id="overall-percent">0</span>%
+                    </div>
+                </div>
+
+                <div id="processing-list" class="flex flex-col gap-6">
+                    <!-- Progress items will be injected here -->
+                </div>
+
+                <div class="mt-8 pt-8 border-t border-outline-variant flex justify-center">
+                    <div class="flex items-center gap-3 text-secondary text-sm italic">
+                        <span class="material-symbols-outlined animate-spin text-primary">sync</span>
+                        Encryption in progress. Do not close this window.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: SUCCESS LIST (folderprocess2.html) -->
+        <div id="step-success" class="w-full max-w-3xl hidden">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 md:p-12 shadow-lg">
+                <div class="text-center mb-10">
+                    <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                        <span class="material-symbols-outlined text-primary text-5xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-on-surface mb-2">Transfer Complete</h1>
+                    <p class="text-secondary max-w-md mx-auto">Your files have been processed successfully. You can now manage your transfer batch below.</p>
+                </div>
+
+                <!-- Batch Info Bar -->
+                <div class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg border border-outline-variant mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-primary/10 rounded flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-xl">folder_zip</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest leading-none">Batch ID</p>
+                            <p class="font-bold text-on-surface">TRF-992301-X</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="p-2 hover:bg-surface-container-high rounded transition-colors text-primary" title="Copy Link">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                        <button class="p-2 hover:bg-surface-container-high rounded transition-colors text-primary" title="Share">
+                            <span class="material-symbols-outlined">share</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Final Documents Table -->
+                <div class="flex flex-col gap-4">
+                    <h3 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest px-1">Uploaded Documents</h3>
+                    <div id="final-document-list" class="flex flex-col divide-y divide-outline-variant border border-outline-variant rounded-lg overflow-hidden">
+                        <!-- Rows injected by JS -->
+                    </div>
+                </div>
+
+                <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="window.location.reload()" class="bg-primary text-on-primary font-bold py-4 rounded-lg hover:shadow-lg transition-all">
+                        Upload More Files
+                    </button>
+                    <button class="bg-transparent border border-outline-variant text-secondary font-bold py-4 rounded-lg hover:bg-surface-container-low transition-colors">
+                        Go to History
+                    </button>
+                </div>
+
+                <!-- Visualization -->
+                <div class="mt-12 relative overflow-hidden rounded-xl h-32 border border-outline-variant">
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10 flex items-center justify-center">
+                         <span class="text-primary/40 font-bold tracking-widest text-sm uppercase">Secure Cloud Infrastructure Active</span>
+                    </div>
+                    <div class="flex gap-4 p-4 opacity-10">
+                        <span class="material-symbols-outlined text-6xl">grid_view</span>
+                        <span class="material-symbols-outlined text-6xl">shield</span>
+                        <span class="material-symbols-outlined text-6xl">dataset</span>
+                        <span class="material-symbols-outlined text-6xl">lock</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant w-full py-8 mt-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 px-margin-page max-w-container-max-width mx-auto">
+            <div class="flex flex-col items-center md:items-start gap-1">
+                <span class="text-xs font-bold text-primary tracking-widest">TRANSFER</span>
+                <p class="text-xs text-secondary opacity-70">© 2026 Transfer. Securely moving your data.</p>
+            </div>
+            <div class="flex gap-6">
+                <a class="text-xs text-secondary hover:text-primary transition-colors" href="#">Privacy Policy</a>
+                <a class="text-xs text-secondary hover:text-primary transition-colors" href="#">Terms of Service</a>
+                <a class="text-xs text-secondary hover:text-primary transition-colors" href="#">Security</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-8 right-8 bg-surface-container-lowest border border-outline-variant p-4 rounded-lg shadow-xl hidden items-center gap-4 z-[100] max-w-sm">
+        <div class="w-2 h-10 bg-primary rounded-full"></div>
+        <div>
+            <p class="text-[10px] font-bold text-primary uppercase tracking-widest">SYSTEM STATUS</p>
+            <p id="toast-message" class="text-xs text-on-surface">Secure connection active.</p>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileListContainer = document.getElementById('file-list-container');
+        const emptyPlaceholder = document.getElementById('empty-list-placeholder');
+        const submitBtn = document.getElementById('submit-btn');
+        const usageText = document.getElementById('usage-text');
+        
+        const stepSelection = document.getElementById('step-selection');
+        const stepProcessing = document.getElementById('step-processing');
+        const stepSuccess = document.getElementById('step-success');
+
+        let selectedFiles = [];
+        const MAX_SIZE = 500 * 1024 * 1024; // 500MB
+
+        // UI Helpers
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            setTimeout(() => {
+                toast.classList.remove('flex');
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        // Logic
+        function updateFileList() {
+            if (selectedFiles.length === 0) {
+                fileListContainer.innerHTML = '';
+                fileListContainer.appendChild(emptyPlaceholder);
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                usageText.innerText = "0 of 500MB used";
+                return;
+            }
+
+            emptyPlaceholder.remove();
+            fileListContainer.innerHTML = '';
+            
+            let totalSize = 0;
+            selectedFiles.forEach((file, index) => {
+                totalSize += file.size;
+                const row = document.createElement('div');
+                row.className = "flex items-center gap-4 p-4 border border-outline-variant bg-surface rounded-lg animate-in fade-in duration-300";
+                row.innerHTML = `
+                    <span class="material-symbols-outlined text-primary">description</span>
+                    <div class="flex-grow">
+                        <p class="text-sm font-bold truncate max-w-[200px] md:max-w-md">${file.name}</p>
+                        <p class="text-[10px] text-on-surface-variant">${formatBytes(file.size)}</p>
+                    </div>
+                    <button onclick="removeFile(${index})" class="material-symbols-outlined text-on-surface-variant hover:text-error text-sm transition-colors">close</button>
+                `;
+                fileListContainer.appendChild(row);
+            });
+
+            usageText.innerText = `${formatBytes(totalSize)} of 500MB used`;
+            
+            if (totalSize > MAX_SIZE) {
+                usageText.classList.add('text-error');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                usageText.classList.remove('text-error');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        window.removeFile = (index) => {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+        };
+
+        // Event Listeners
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            selectedFiles = [...selectedFiles, ...files];
+            updateFileList();
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('bg-primary/20');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('bg-primary/20');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('bg-primary/20');
+            const files = Array.from(e.dataTransfer.files);
+            selectedFiles = [...selectedFiles, ...files];
+            updateFileList();
+        });
+
+        submitBtn.addEventListener('click', startTransfer);
+
+        async function startTransfer() {
+            stepSelection.classList.add('hidden');
+            stepProcessing.classList.remove('hidden');
+
+            const processingList = document.getElementById('processing-list');
+            processingList.innerHTML = '';
+
+            // Initialize progress UI
+            const progresses = selectedFiles.map((file, i) => {
+                const item = document.createElement('div');
+                item.className = "flex flex-col gap-2";
+                item.innerHTML = `
+                    <div class="flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-sm">draft</span>
+                            <span class="font-bold truncate max-w-[200px] md:max-w-md">${file.name}</span>
+                        </div>
+                        <span id="file-prog-text-${i}" class="text-xs text-on-surface-variant">0%</span>
+                    </div>
+                    <div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+                        <div id="file-prog-bar-${i}" class="bg-primary h-full w-0 animate-progress"></div>
+                    </div>
+                `;
+                processingList.appendChild(item);
+                return { current: 0, target: 100 };
+            });
+
+            // Simulate Upload
+            let completed = 0;
+            const totalFiles = selectedFiles.length;
+
+            const interval = setInterval(() => {
+                let allDone = true;
+                let totalPercentage = 0;
+
+                selectedFiles.forEach((_, i) => {
+                    const bar = document.getElementById(`file-prog-bar-${i}`);
+                    const text = document.getElementById(`file-prog-text-${i}`);
+                    
+                    if (progresses[i].current < 100) {
+                        progresses[i].current += Math.random() * 15;
+                        if (progresses[i].current > 100) progresses[i].current = 100;
+                        allDone = false;
+                    }
+                    
+                    bar.style.width = `${progresses[i].current}%`;
+                    text.innerText = `${Math.floor(progresses[i].current)}%`;
+                    totalPercentage += progresses[i].current;
+                });
+
+                document.getElementById('overall-percent').innerText = Math.floor(totalPercentage / totalFiles);
+
+                if (allDone) {
+                    clearInterval(interval);
+                    setTimeout(showSuccess, 800);
+                }
+            }, 150);
+        }
+
+        function showSuccess() {
+            stepProcessing.classList.add('hidden');
+            stepSuccess.classList.remove('hidden');
+            
+            const finalDocList = document.getElementById('final-document-list');
+            finalDocList.innerHTML = '';
+
+            selectedFiles.forEach(file => {
+                const row = document.createElement('div');
+                row.className = "bg-white flex items-center justify-between p-4 hover:bg-surface-container-lowest transition-colors group";
+                row.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center group-hover:bg-primary/5 transition-colors">
+                            <span class="material-symbols-outlined text-secondary">description</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">${file.name}</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase tracking-tight">${formatBytes(file.size)} • Encrypted AES-256</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="hidden md:block text-[10px] font-bold text-success-600 bg-green-100 text-green-700 px-2 py-1 rounded">SECURE</span>
+                        <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">download</button>
+                    </div>
+                `;
+                finalDocList.appendChild(row);
+            });
+
+            showToast("Transfer batch archived successfully.");
+        }
+    </script>
+</body>
+</html>
